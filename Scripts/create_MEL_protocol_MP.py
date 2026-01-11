@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Aug 21 10:22:48 2024
+Created on Tue Aug 20 17:44:03 2024 by jmarti2
+Edited on Sun Jan 11 09:47:00 2026 by Carolina Guidolin for SHINE project
 
-@author: jmarti2
+This script creates the Melanopsin protocol for the SHINE project. 
 
-This script creates the Melanopsin protocol for the HELLIOS-BD project. 
-
-The protocol begins with a 4 minute adaptation to the background spectrum, followed
+The protocol begins with a 3 minute adaptation to the background spectrum, followed
 by 16 pulses of Melanopsin-directed contrast. 
 
 Stimuli are 3-s pulses of light windowed by a half cosine ramp (500 ms each 
@@ -43,6 +42,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams['font.size'] = 12
 
+project_path = r"C:\code\shine_retinawise_protocols"
+
 # %%
 for PARTICIPANT_AGE in range(23,36):
 # %%
@@ -51,7 +52,7 @@ for PARTICIPANT_AGE in range(23,36):
     obs = observers.ColorimetricObserver(age=PARTICIPANT_AGE, field_size=10)
     # Set up the problem
     sspr = problems.SilentSubstitutionProblem(
-        calibration=r"..\Calibration\retinawise_spds_right_eye.csv",
+        calibration= op.join(project_path, r"Calibration\retinawise_spds_right_eye.csv"),
         calibration_wavelengths=[380, 780, 1],
         primary_resolutions=[100] * 6,
         primary_colors=["violet", "blue", "cyan", "green", "orange", "red"],
@@ -93,7 +94,7 @@ for PARTICIPANT_AGE in range(23,36):
     print(f"Modulation: {sr.x[6:]}")
     
     # Make an output directory
-    out_dir = rf"..\Protocols\SHINE\Melanopsin\{PARTICIPANT_AGE}"
+    out_dir = op.join(project_path, rf"Protocols\SHINE\Melanopsin\{PARTICIPANT_AGE}")
     os.makedirs(out_dir, exist_ok=True)
     
     # Save the optimization result
@@ -212,8 +213,10 @@ for PARTICIPANT_AGE in range(23,36):
         + [0, 0, 0, 0]
     )
     # The adaptation period
+    # 9000 units = 9000*20ms = 180000(each unit is 20ms as defined above by sampling_time)
+    # 180000ms = 180s = 3 minutes
     adapt = (
-        [12000, "adapt", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "adapt"]
+        [9000, "adapt", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "adapt"]
         + list(sr.x[0:6])
         + [0, 0, 0, 0]
     )
@@ -269,7 +272,7 @@ for PARTICIPANT_AGE in range(23,36):
         f.writelines(header)
         f.write(delimit(adapt))
         f.write("\n")
-        for i in range(15):  # Number of repeats
+        for i in range(16):  # Number of repeats
     
             trial_id += 1
             # Write jitter

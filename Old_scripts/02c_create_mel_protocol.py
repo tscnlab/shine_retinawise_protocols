@@ -51,7 +51,7 @@ for PARTICIPANT_AGE in range(23,36):
     obs = observers.ColorimetricObserver(age=PARTICIPANT_AGE, field_size=10)
     # Set up the problem
     sspr = problems.SilentSubstitutionProblem(
-        calibration=r"..\Calibration\retinawise_spds_right_eye.csv",
+        calibration=r"C:\Users\experiment\Documents\RetinaWISE\CalibrationMP\right_spds.csv",
         calibration_wavelengths=[380, 780, 1],
         primary_resolutions=[100] * 6,
         primary_colors=["violet", "blue", "cyan", "green", "orange", "red"],
@@ -93,7 +93,7 @@ for PARTICIPANT_AGE in range(23,36):
     print(f"Modulation: {sr.x[6:]}")
     
     # Make an output directory
-    out_dir = rf"..\Protocols\SHINE\Melanopsin\{PARTICIPANT_AGE}"
+    out_dir = rf"C:\Users\experiment\Documents\RetinaWISE\Protocols\SHINE\Melanopsin\{PARTICIPANT_AGE}"
     os.makedirs(out_dir, exist_ok=True)
     
     # Save the optimization result
@@ -261,31 +261,32 @@ for PARTICIPANT_AGE in range(23,36):
     Protocole:;;;;;;;;;;;;;;;;;;;;;;
     NumSample;Label L;LED L1;LED L2;LED L3;LED L4;LED L5;LED L6;L L;M L;S L;g L;Label R;LED R1;LED R2;LED R3;LED R4;LED R5;LED R6;L R;M R;S R;g R
     """
-    trial_id = 0
+    
     # Create the protocol file
     with open(
-        op.join(out_dir, f"SHINE_MELANOPSIN_SS_{PARTICIPANT_AGE}.csv"), "w"
+        op.join(out_dir, f"HELIOS_MELANOPSIN_SS_{PARTICIPANT_AGE}.csv"), "w"
     ) as f:
         f.writelines(header)
+        f.write(delimit(sequence))
+        f.write("\n")
         f.write(delimit(adapt))
         f.write("\n")
         for i in range(15):  # Number of repeats
+            # Write sequence breaker
+            f.write(delimit(sequence))
+            f.write("\n")
     
-            trial_id += 1
             # Write jitter
             jitter[0] = random.randrange(1, 150)
-            jitter[12] = f"{trial_id}-mel-jitter"
             f.write(delimit(jitter))
             f.write("\n")
     
             # Write baseline period
-            baseline[12] = f"{trial_id}-mel-baseline"
             f.write(delimit(baseline))
             f.write("\n")
     
             # Write the MEL stimulus
             for i in mel_list:
-                i[12] = f"{trial_id}-mel-stimulation"
                 f.write(delimit(i))
                 f.write("\n")
     
@@ -293,3 +294,35 @@ for PARTICIPANT_AGE in range(23,36):
             f.write(delimit(measurement))
             f.write("\n")
     
+    
+    # %% Create measurement file
+    
+    # This protocol file can be used to obtain measurements of the background and
+    # modulation spectra before the experiment (using the milk glass approach)
+    
+    # Create the protocol file
+    with open(
+        op.join(out_dir, "./HELIOS_MELANOPSIN_2_measurement_file.csv"),
+        "w",
+    ) as f:
+        f.writelines(header)
+    
+        # Write sequence breaker
+        f.write(delimit(sequence))
+        f.write("\n")
+    
+        # Background
+        f.write(delimit(bg[0]))
+        f.write("\n")
+    
+        # Write sequence breaker
+        f.write(delimit(sequence))
+        f.write("\n")
+    
+        # Modulation
+        f.write(delimit(mel[0]))
+        f.write("\n")
+
+        # Write sequence breaker
+        f.write(delimit(sequence))
+        f.write("\n")

@@ -52,11 +52,11 @@ import pandas as pd
 for PARTICIPANT_AGE in range(23,36):
 
     # This is the target log quantal radiance, chosen because it is achieveable for
-    # ages ranged 23 - 35 after lens filtering
-    target_log_quanta = 17.55
+    # ages ranged 20 - 65 after lens filtering
+    target_log_quanta = 17.54
     
     # %%
-    right_cal = r"..\Calibration\retinawise_spds_right_eye.csv"
+    right_cal = r"C:\Users\experiment\Documents\RetinaWISE\CalibrationMP\right_spds.csv"
     right_ssp = problems.SilentSubstitutionProblem(
         calibration=right_cal,
         calibration_wavelengths=[380, 781, 1],
@@ -129,9 +129,7 @@ for PARTICIPANT_AGE in range(23,36):
     plot_solution(rs, bs, right_ssp, t)
     
     # Make output directory
-    #out_dir = rf"C:\Users\jmarti2\OneDrive - University of Edinburgh\RetinaWISE\Protocols\HELIOS-BD\PIPR\{PARTICIPANT_AGE}"
-    out_dir = rf"..\Protocols\SHINE\PIPR\{PARTICIPANT_AGE}"
-    
+    out_dir = rf"C:\Users\experiment\Documents\RetinaWISE\Protocols\SHINE\PIPR\{PARTICIPANT_AGE}"
     os.makedirs(out_dir, exist_ok=True)
     
     # Save nominal spectra
@@ -142,6 +140,7 @@ for PARTICIPANT_AGE in range(23,36):
     df = pd.concat([red, blue], axis=1)
     df.to_csv(op.join(out_dir, "nominal_spectra.csv"))
     
+    print(f"\nAge : {PARTICIPANT_AGE}")
     # Print LED input values
     print("The LED settings: ")
     print(f"\tBlue: {bs}")
@@ -226,7 +225,7 @@ for PARTICIPANT_AGE in range(23,36):
     # Random jitter. Later we will choose a random number for NumSample
     jitter = [
         1,
-        0,
+        "jitter",
         0,
         0,
         0,
@@ -252,7 +251,7 @@ for PARTICIPANT_AGE in range(23,36):
     # The baseline period
     baseline = [
         50,
-        0,
+        "baseline",
         0,
         0,
         0,
@@ -279,7 +278,7 @@ for PARTICIPANT_AGE in range(23,36):
     reds = [
         [
             1,
-            0,
+            "red",
             0,
             0,
             0,
@@ -308,7 +307,7 @@ for PARTICIPANT_AGE in range(23,36):
     blues = [
         [
             1,
-            0,
+            "blue",
             0,
             0,
             0,
@@ -336,7 +335,7 @@ for PARTICIPANT_AGE in range(23,36):
     # 16 s measurement period
     measurement = [
         800,
-        0,
+        "measurement",
         0,
         0,
         0,
@@ -400,61 +399,83 @@ for PARTICIPANT_AGE in range(23,36):
     Protocole:;;;;;;;;;;;;;;;;;;;;;;
     NumSample;Label L;LED L1;LED L2;LED L3;LED L4;LED L5;LED L6;L L;M L;S L;g L;Label R;LED R1;LED R2;LED R3;LED R4;LED R5;LED R6;L R;M R;S R;g R
     """
-    trial_id = 0
+    
     # Create the protocol file
-    with open(op.join(out_dir, f"./SHINE_PIPR_{PARTICIPANT_AGE}.csv"), "w") as f:
+    with open(op.join(out_dir, f"./HELIOS_PIPR_{PARTICIPANT_AGE}.csv"), "w") as f:
         f.writelines(header)
-        for trialnum in range(1,7):  # Six of each stimuli
+        for i in range(6):  # Six of each stimuli
             # Write sequence breaker
-
-            trial_id += 1
+            f.write(delimit(sequence))
+            f.write("\n")
+    
             # Write jitter
             jitter[0] = random.randrange(1, 150)
-            jitter[12] = f"{trial_id}-red-jitter"
             f.write(delimit(jitter))
             f.write("\n")
     
             # Write baseline period
-            baseline[12] = f"{trial_id}-red-baseline"
             f.write(delimit(baseline))
             f.write("\n")
     
             # Write the RED stimulus
             for i in red_list:
-                i[12] = f"{trial_id}-red-stimulation"
                 f.write(delimit(i))
                 f.write("\n")
     
             # Write measurment period
-            measurement[12] = f"{trial_id}-red-measurement"
             f.write(delimit(measurement))
             f.write("\n")
     
             # Write sequence breaker
-            #f.write(delimit(sequence))
-            #f.write("\n")
-            trial_id += 1
-
+            f.write(delimit(sequence))
+            f.write("\n")
+    
             # Write jitter
             jitter[0] = random.randrange(1, 150)
-            jitter[12] = f"{trial_id}-blue-jitter"
             f.write(delimit(jitter))
             f.write("\n")
     
             # Write baseline period
-            baseline[12] = f"{trial_id}-blue-baseline"
             f.write(delimit(baseline))
             f.write("\n")
     
             # Write the BLUE stimulus
             for i in blue_list:
-                i[12] = f"{trial_id}-blue-stimulation"
                 f.write(delimit(i))
                 f.write("\n")
     
             # Write measurment period
-            measurement[12] = f"{trial_id}-blue-measurement"
             f.write(delimit(measurement))
             f.write("\n")
     
-
+    # %% Create measurement file
+    
+    # This protocol file can be used to obtain measurements of the red and blue
+    # spectra before the experiment (using the milk glass approach)
+    
+    # Create the protocol file
+    with open(
+        op.join(out_dir, f"./HELIOS_PIPR_{PARTICIPANT_AGE}_measurement_file.csv"),
+        "w",
+    ) as f:
+        f.writelines(header)
+    
+        # Write sequence breaker
+        f.write(delimit(sequence))
+        f.write("\n")
+    
+        # Red
+        f.write(delimit(reds[0]))
+        f.write("\n")
+    
+        # Write sequence breaker
+        f.write(delimit(sequence))
+        f.write("\n")
+    
+        # Blue
+        f.write(delimit(blues[0]))
+        f.write("\n")
+        
+        # Write sequence breaker
+        f.write(delimit(sequence))
+        f.write("\n")

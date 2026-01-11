@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 20 17:44:03 2024
+Created on Tue Aug 20 17:44:03 2024 by jmarti2
+Edited on Sun Jan 11 09:47:00 2026 by Carolina Guidolin for SHINE project
 
-@author: jmarti2
+This script creates the PIPR protocol for the SHINE project. 
 
-This script creates the PIPR protocol for the HELLIOS-BD project. 
-
-The protocol comprises 6 red and 6 blue light stimli presented alternately. It
+The protocol comprises 4 red and 4 blue light stimli presented alternately. It
 should be administered after 10 minutes of dark adaptation. 
 
 Stimuli are 3-s pulses of light windowed by a half cosine ramp (500 ms each 
 side). There is a 1 s baseline and a 16 s measurement period surrounding the
 stimulus. Additionally, there is a random jitter of 0 - 3 s between each 
-stimulus.
+stimulus. 
 
 The intensity of the red and blue stimuil are matched for quantal radiance
 using an optimization procedure that accounts for lens transmittance given the
@@ -47,6 +46,8 @@ import numpy as np
 import pandas as pd
 
 
+project_path = r"C:\code\shine_retinawise_protocols"
+
 # %%
 # Set the participant age accordingly.
 for PARTICIPANT_AGE in range(23,36):
@@ -56,7 +57,8 @@ for PARTICIPANT_AGE in range(23,36):
     target_log_quanta = 17.55
     
     # %%
-    right_cal = r"..\Calibration\retinawise_spds_right_eye.csv"
+    right_cal = op.join(project_path, r"Calibration\retinawise_spds_right_eye.csv")
+
     right_ssp = problems.SilentSubstitutionProblem(
         calibration=right_cal,
         calibration_wavelengths=[380, 781, 1],
@@ -130,7 +132,7 @@ for PARTICIPANT_AGE in range(23,36):
     
     # Make output directory
     #out_dir = rf"C:\Users\jmarti2\OneDrive - University of Edinburgh\RetinaWISE\Protocols\HELIOS-BD\PIPR\{PARTICIPANT_AGE}"
-    out_dir = rf"..\Protocols\SHINE\PIPR\{PARTICIPANT_AGE}"
+    out_dir = op.join(project_path, rf"Protocols\SHINE\PIPR\{PARTICIPANT_AGE}")
     
     os.makedirs(out_dir, exist_ok=True)
     
@@ -404,7 +406,7 @@ for PARTICIPANT_AGE in range(23,36):
     # Create the protocol file
     with open(op.join(out_dir, f"./SHINE_PIPR_{PARTICIPANT_AGE}.csv"), "w") as f:
         f.writelines(header)
-        for trialnum in range(1,7):  # Six of each stimuli
+        for trialnum in range(1,5):  # Four of each stimuli
             # Write sequence breaker
 
             trial_id += 1
